@@ -6,6 +6,14 @@ Docker Compose stack for running:
 - **Appsmith** as the frontend for forms, data entry, and internal tools
 - **Metabase** as the analytics/dashboard layer on top of Postgres
 
+## Configure environment variables
+
+Copy the example environment file and choose your own passwords before starting the stack:
+
+```bash
+cp .env.example .env
+```
+
 ## Start the stack
 
 ```bash
@@ -18,7 +26,9 @@ docker compose up -d
 - Metabase: http://localhost:3000
 - Postgres: localhost:5432
 
-## Default database credentials
+## Default connection settings
+
+The values below come from your local `.env` file.
 
 ### Postgres application database
 
@@ -26,28 +36,28 @@ Use these credentials from Appsmith when creating a Postgres datasource:
 
 - Host: `postgres` (inside Docker) or `localhost` (from your machine)
 - Port: `5432`
-- Database: `map`
-- Username: `map`
-- Password: `map_password`
+- Database: `${POSTGRES_DB}`
+- Username: `${POSTGRES_USER}`
+- Password: `${POSTGRES_PASSWORD}`
 
 ### Metabase application database
 
 Metabase stores its own internal metadata in a separate Postgres database created automatically at startup:
 
-- Database: `metabase`
-- Username: `metabase`
-- Password: `metabase_password`
+- Database: `${METABASE_DB_NAME}`
+- Username: `${METABASE_DB_USER}`
+- Password: `${METABASE_DB_PASSWORD}`
 
 ## Wiring the services together
 
-1. Open **Appsmith** and create a Postgres datasource using the `map` database credentials above.
+1. Open **Appsmith** and create a Postgres datasource using the application database credentials from `.env`.
 2. Build your forms and data entry apps in Appsmith so they read from and write to Postgres.
 3. Open **Metabase**, complete the first-run setup, and add the same Postgres server as a data source for analytics using:
    - Host: `postgres`
    - Port: `5432`
-   - Database: `map`
-   - Username: `map`
-   - Password: `map_password`
+   - Database: the `POSTGRES_DB` value from `.env`
+   - Username: the `POSTGRES_USER` value from `.env`
+   - Password: the `POSTGRES_PASSWORD` value from `.env`
 
 ## Stop the stack
 
