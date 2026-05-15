@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: map-postgres
+    environment:
+      POSTGRES_DB: map
+      POSTGRES_USER: map
+      POSTGRES_PASSWORD: map_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U map -d map"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  appsmith:
+    image: appsmith/appsmith-ce:v1.99
+    container_name: map-appsmith
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - appsmith_stacks:/appsmith-stacks
+    restart: unless-stopped
+
+  metabase:
+    image: metabase/metabase:v0.61.1.x
+    container_name: map-metabase
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase
+      MB_DB_PORT: 5432
+      MB_DB_USER: metabase
+      MB_DB_PASS: metabase_password
+      MB_DB_HOST: postgres
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  appsmith_stacks:
